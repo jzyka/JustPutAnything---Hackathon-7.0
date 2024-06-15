@@ -48,84 +48,70 @@
         <div class="search">
           <v-text-field
             density="compact"
-            placeholder="Cari Properti"
+            placeholder="Search chats"
             append-inner-icon="mdi-magnify"
             variant="outlined"
             v-model="keyword"
-            max-wid
           ></v-text-field>
         </div>
         <div class="cust-list">
-          <div class="cust">
+          <div
+            class="cust"
+            v-for="chat in filteredChats"
+            :key="chat.customerId"
+            @click="selectChat(chat)"
+          >
             <div class="left"></div>
             <div class="right">
-              <p class="cust-name">Customer Name 1</p>
-              <p class="cust-type">Technical Problem</p>
-              <p class="recent-chat">Lorem ipsum dolor sit amet, Lorem</p>
+              <p class="cust-name">{{ chat.customerName }}</p>
+              <p class="cust-type">{{ chat.issue }}</p>
+              <p class="recent-chat">{{ chat.messages[0].text }}</p>
             </div>
           </div>
         </div>
       </div>
-      <div class="chatroom">
+      <div class="chatroom" v-if="selectedChat">
         <div class="top">
           <div class="left">
-            <p class="cust-name">Cust Name 1</p>
+            <p class="cust-name">{{ selectedChat.customerName }}</p>
             <div class="part"></div>
-            <p class="type">Technical Problem</p>
+            <p class="type">{{ selectedChat.issue }}</p>
           </div>
 
           <v-img class="info" src="@/assets/info-icon.png" contain></v-img>
         </div>
 
         <p class="warn">
-          All chats are being recorded, Please do not share any confidential
-          Datas.
+          All chats are being recorded. Please do not share any confidential
+          information.
         </p>
 
         <div class="dialogues">
-          <div class="cust">
+          <div
+            class="cust"
+            v-for="message in selectedChat.messages"
+            :key="message.id"
+          >
             <div class="bubble">
-              <p class="real">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et
-                massa mi. Aliquam in hendrerit urna.
-              </p>
-              <div class="tl">
-                <p class="lang-code">EN</p>
-                <p class="tled">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </p>
+              <p class="real">{{ message.text }}</p>
+              <div class="tl" v-if="message.translatedText">
+                <p class="lang-code">{{ message.language }}</p>
+                <p class="tled">{{ message.translatedText }}</p>
               </div>
             </div>
             <div class="extra-info">
-              <p class="time">10.00 AM</p>
-              <p class="tl-info">Translated from Spanish</p>
-            </div>
-          </div>
-
-          <div class="response">
-            <div class="bubble">
-              <p class="real">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et
-                massa mi. Aliquam in hendrerit urna.
+              <p class="time">{{ message.time }}</p>
+              <p class="tl-info" v-if="message.translatedText">
+                Translated from {{ message.language }}
               </p>
-            </div>
-            <div class="extra-info">
-              <div class="read-stat"></div>
-              <p class="time">10.00 AM</p>
             </div>
           </div>
         </div>
       </div>
-      <div class="aiSummarize">
+      <div class="aiSummarize" v-if="summary">
         <p class="title">Summary</p>
         <div class="box-res">
-          <p class="res">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa
-            mi. Aliquam in hendrerit urna. Pellentesque sit amet sapien
-            fringilla, mattis ligula consectetur, ultrices mauris. lorem =
-            <br />
-            ABC <br />HE wants this <br />aaaaaaaaa
-          </p>
+          <p class="res">{{ summary.text }}</p>
           <div class="ai-status">
             <div class="status-color"></div>
             <p class="status">AI On</p>
@@ -136,14 +122,17 @@
           <p class="title-senti">Customer Sentiment</p>
           <div class="senti-stat">
             <p class="title-mini">Customer is</p>
-            <p class="status angry">Angry</p>
+            <p class="status angry">{{ summary.sentiment }}</p>
           </div>
         </div>
 
         <div class="satisfaction">
           <p class="title-sect">Satisfaction Meter</p>
-          <v-progress-linear model-value="20" :height="5"></v-progress-linear>
-          <p class="percentage">20%</p>
+          <v-progress-linear
+            :model-value="summary.satisfactionMeter"
+            :height="5"
+          ></v-progress-linear>
+          <p class="percentage">{{ summary.satisfactionMeter }}%</p>
         </div>
       </div>
     </div>
@@ -154,10 +143,139 @@
 export default {
   data: () => ({
     keyword: null,
+    chats: [
+      {
+        customerId: 1,
+        customerName: "Alice Johnson",
+        issue: "Technical Problem",
+        messages: [
+          {
+            id: 1,
+            text: "I'm having trouble connecting to the Wi-Fi. Can you help?",
+            translatedText:
+              "Estoy teniendo problemas para conectarme a la Wi-Fi. ¿Puedes ayudarme?",
+            language: "ES",
+            time: "09:30 AM",
+          },
+          {
+            id: 2,
+            text: "Sure, have you tried restarting your router?",
+            time: "09:32 AM",
+          },
+        ],
+      },
+      {
+        customerId: 2,
+        customerName: "Bob Smith",
+        issue: "Billing Issue",
+        messages: [
+          {
+            id: 1,
+            text: "I was overcharged on my last bill. Can you explain why?",
+            translatedText:
+              "Fui sobrecargado en mi última factura. ¿Puedes explicar por qué?",
+            language: "ES",
+            time: "10:00 AM",
+          },
+          {
+            id: 2,
+            text: "Let me check your account for details.",
+            time: "10:05 AM",
+          },
+        ],
+      },
+      {
+        customerId: 3,
+        customerName: "Charlie Davis",
+        issue: "General Inquiry",
+        messages: [
+          {
+            id: 1,
+            text: "What are your customer service hours?",
+            translatedText: "¿Cuáles son las horas de servicio al cliente?",
+            language: "ES",
+            time: "11:15 AM",
+          },
+          {
+            id: 2,
+            text: "Our customer service is available 24/7.",
+            time: "11:16 AM",
+          },
+        ],
+      },
+      {
+        customerId: 4,
+        customerName: "Dana White",
+        issue: "Product Inquiry",
+        messages: [
+          {
+            id: 1,
+            text: "Can you tell me more about the features of your latest product?",
+            translatedText:
+              "¿Puedes contarme más sobre las características de tu último producto?",
+            language: "ES",
+            time: "12:00 PM",
+          },
+          {
+            id: 2,
+            text: "Of course! Our latest product offers a variety of new features including...",
+            time: "12:05 PM",
+          },
+        ],
+      },
+    ],
+    summary: {
+      text: "",
+      sentiment: "",
+      satisfactionMeter: 0,
+    },
+    selectedChat: null,
   }),
+  mounted() {
+    this.loadDummyData();
+  },
+  methods: {
+    loadDummyData() {
+      this.selectedChat = this.chats[0]; // Default to the first chat
+      this.updateSummary(this.selectedChat); // Update summary for initial selected chat
+    },
+    selectChat(chat) {
+      this.selectedChat = chat;
+      this.updateSummary(chat); // Update summary when a new chat is selected
+    },
+    updateSummary(chat) {
+      // Constructing the summary text dynamically based on the selected chat
+      let summaryText = `${chat.customerName} `;
+      if (chat.issue === "Technical Problem") {
+        summaryText += `is facing technical issues.`;
+      } else if (chat.issue === "Billing Issue") {
+        summaryText += `has billing inquiries.`;
+      } else if (chat.issue === "General Inquiry") {
+        summaryText += `has general inquiries.`;
+      }
+
+      // Set the summary object
+      this.summary.text = summaryText;
+      // Example sentiment and satisfaction meter values (adjust as needed)
+      this.summary.sentiment = "Neutral";
+      this.summary.satisfactionMeter = 50;
+    },
+  },
+  computed: {
+    filteredChats() {
+      if (!this.keyword) {
+        return this.chats;
+      }
+      const lowerKeyword = this.keyword.toLowerCase();
+      return this.chats.filter(
+        (chat) =>
+          chat.customerName.toLowerCase().includes(lowerKeyword) ||
+          chat.issue.toLowerCase().includes(lowerKeyword)
+      );
+    },
+  },
 };
 </script>
-
 <style lang="scss" scoped>
 header {
   background-color: $primary-color;

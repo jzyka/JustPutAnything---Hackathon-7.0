@@ -45,7 +45,11 @@
           ></v-text-field>
         </div>
 
-        <div class="login-btn"><p>Login</p></div>
+        <div class="login-btn" @click="handleLogin"><p>Login</p></div>
+
+        <div v-if="errorField" class="error-message">
+          <p>{{ errorField.message }}</p>
+        </div>
       </div>
     </div>
   </v-app>
@@ -59,11 +63,20 @@ export default {
     show4: false,
     loginClicked: false,
     errorField: null,
+    // JSON object to store user data with roles
+    users: [
+      { email: "admin@gmail.com", password: "admin123", role: "admin" },
+      {
+        email: "customer@gmail.com",
+        password: "customer123",
+        role: "customer",
+      },
+    ],
     rules: {
       required: (value) => !!value || "Field is required",
       email: (value) => {
         const pattern =
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return pattern.test(value) || "Invalid e-mail.";
       },
       min: (v) => v.length >= 8 || "Min 8 characters",
@@ -72,38 +85,38 @@ export default {
   methods: {
     handleLogin() {
       this.loginClicked = true; // Set loginClicked to true when the button is clicked
-      // Add any other login logic here
+
+      if (!this.email || !this.password) {
+        // Display an error message for empty fields
+        this.errorField = { message: "Please enter both email and password" };
+        return;
+      }
+
+      // Find the user based on email and password
+      const user = this.users.find(
+        (u) => u.email === this.email && u.password === this.password
+      );
+
+      if (user) {
+        // Simulate a successful login
+        setTimeout(() => {
+          // Redirect based on the user's role
+          if (user.role === "admin") {
+            this.$router.push({ name: "home" });
+          } else if (user.role === "customer") {
+            this.$router.push({ name: "report" });
+          }
+        }, 1000); // Redirect after 1 second
+      } else {
+        // Display an error message for invalid email or password
+        this.errorField = {
+          message: "Invalid email or password. Please try again.",
+        };
+      }
     },
     isEmpty(value) {
       return value.trim() === ""; // Helper function to check if a value is empty
     },
-    // async login() {
-    //   try {
-    //     if (!this.email || !this.password) {
-    //       // Display an error message for empty fields
-    //       this.errorField = { message: "Please enter both email and password" };
-    //       this.loginClicked = true;
-    //       return;
-    //     }
-
-    //     const res = await axios.post(`${this.$api}/auth/login`, {
-    //       email: this.email,
-    //       password: this.password,
-    //     });
-
-    //     if (res.status === 200) {
-    //       localStorage.setItem("data", JSON.stringify(res.data));
-    //       axios.defaults.headers.common[
-    //         "Authorization"
-    //       ] = `Bearer ${res.data.token}`;
-    //       this.$router.push({ name: "properties" });
-    //     }
-    //   } catch (error) {
-    //     console.log(error.response.data);
-    //     const errorField = error.response.data;
-    //     this.errorField = errorField;
-    //   }
-    // },
   },
 };
 </script>
