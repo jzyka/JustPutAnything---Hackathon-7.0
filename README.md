@@ -4,6 +4,15 @@
 ```
 npm install
 ```
+## Project setup
+```
+npm i vue
+```
+
+## Project setup
+```
+npm install -g @vue/cli
+```
 
 ### Compiles and hot-reloads for development
 ```
