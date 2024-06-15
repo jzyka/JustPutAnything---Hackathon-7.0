@@ -8,7 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@gradio/client": "^1.1.1",
     "@mdi/font": "5.9.55",
+    "axios": "^1.7.2",
     "core-js": "^3.8.3",
     "express": "^4.19.2",
     "prompt-sync": "^4.2.0",
